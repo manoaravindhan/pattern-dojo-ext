@@ -1,0 +1,9 @@
+{
+  "name": "Pattern Dojo",
+  "id": "pattern-dojo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "VS Code test extension",
+  "publisher": "localhost",
+  "repository": "https://github.com/yourusername/pattern-dojo"
+}

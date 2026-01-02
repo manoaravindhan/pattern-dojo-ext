@@ -1,0 +1,87 @@
+{
+  "name": "pattern-dojo",
+  "displayName": "Pattern Dojo",
+  "description": "Detects design pattern issues and highlights them with a scalable architecture",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pattern-dojo.refresh",
+        "title": "Refresh Pattern Analysis"
+      },
+      {
+        "command": "pattern-dojo.reportIssue",
+        "title": "Report Pattern Issue"
+      }
+    ],
+    "configuration": {
+      "title": "Pattern Dojo",
+      "properties": {
+        "pattern-dojo.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable Pattern Dojo analysis"
+        },
+        "pattern-dojo.patterns": {
+          "type": "array",
+          "default": [
+            "singleton",
+            "factory",
+            "observer",
+            "strategy",
+            "decorator",
+            "adapter",
+            "facade",
+            "proxy"
+          ],
+          "description": "Design patterns to analyze"
+        },
+        "pattern-dojo.severity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "information"
+          ],
+          "default": "warning",
+          "description": "Severity level for pattern violations"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "tree-sitter-c-sharp": "^0.23.1",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-python": "^0.25.0",
+    "web-tree-sitter": "^0.26.3"
+  }
+}

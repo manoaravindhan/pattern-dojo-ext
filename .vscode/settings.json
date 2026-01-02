@@ -1,0 +1,10 @@
+{
+  "search.exclude": {
+    "out": true,
+    "node_modules": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  }
+}
