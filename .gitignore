@@ -1,16 +1,49 @@
+# Node
 node_modules/
+
+# Compiled output
 out/
 dist/
-*.vsix
-.DS_Store
+lib/
+
+# VS Code
+.vscode/
 .vscode-test/
+
+# Packaging
+*.vsix
+*.tgz
+
+# Environment
 .env
 .env.local
+
+# IDEs
 .idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Editor swap/temp files
 *.swp
 *.swo
 *~
+
+# macOS
 .DS_Store
+
+# Coverage and reports
 coverage/
+.nyc_output/
+
+# Logs
 *.log
 npm-debug.log*
+
+# Tree-sitter / build caches (if present)
+.cache/
+web-tree-sitter/build/
+
+# OS generated files
+Thumbs.db
