@@ -46,7 +46,7 @@ Welcome to Pattern Dojo! This document guides you to all available resources.
 ## 💡 Example Code
 
 ### Pattern Violations Demo
-- **[example.ts](example.ts)** - Live examples of all pattern violations
+- **[example.ts](../examples/ts/example.ts)** - Live examples of all pattern violations
   - Singleton issues
   - Factory pattern problems
   - Observer pattern anti-patterns
@@ -169,42 +169,42 @@ Access via Command Palette (Ctrl+Shift+P)
 ### 1. Singleton Pattern
 **What it detects**: Public constructors, multiple instances
 **Why it matters**: Singleton should have single controlled instance
-**See**: [singletonProvider.ts](src/patterns/implementations/singletonProvider.ts)
+**See**: [singletonProvider.ts](../src/patterns/implementations/singletonProvider.ts)
 
 ### 2. Factory Pattern
 **What it detects**: Multiple instantiation points for same class
 **Why it matters**: Factory centralizes object creation
-**See**: [factoryProvider.ts](src/patterns/implementations/factoryProvider.ts)
+**See**: [factoryProvider.ts](../src/patterns/implementations/factoryProvider.ts)
 
 ### 3. Observer Pattern
 **What it detects**: Event listeners without cleanup
 **Why it matters**: Prevents memory leaks
-**See**: [observerProvider.ts](src/patterns/implementations/observerProvider.ts)
+**See**: [observerProvider.ts](../src/patterns/implementations/observerProvider.ts)
 
 ### 4. Strategy Pattern
 **What it detects**: Long switch/if-else chains
 **Why it matters**: Strategy encapsulates algorithms
-**See**: [strategyProvider.ts](src/patterns/implementations/strategyProvider.ts)
+**See**: [strategyProvider.ts](../src/patterns/implementations/strategyProvider.ts)
 
 ### 5. Decorator Pattern
 **What it detects**: Deep inheritance hierarchies
 **Why it matters**: Decorator adds functionality dynamically
-**See**: [decoratorProvider.ts](src/patterns/implementations/decoratorProvider.ts)
+**See**: [decoratorProvider.ts](../src/patterns/implementations/decoratorProvider.ts)
 
 ### 6. Adapter Pattern
 **What it detects**: Type assertions and interface mismatches
 **Why it matters**: Adapter bridges incompatible interfaces
-**See**: [adapterProvider.ts](src/patterns/implementations/adapterProvider.ts)
+**See**: [adapterProvider.ts](../src/patterns/implementations/adapterProvider.ts)
 
 ### 7. Facade Pattern
 **What it detects**: Classes with too many public methods
 **Why it matters**: Facade simplifies complex subsystems
-**See**: [facadeProvider.ts](src/patterns/implementations/facadeProvider.ts)
+**See**: [facadeProvider.ts](../src/patterns/implementations/facadeProvider.ts)
 
 ### 8. Proxy Pattern
 **What it detects**: Expensive operations called repeatedly
 **Why it matters**: Proxy enables lazy loading/caching
-**See**: [proxyProvider.ts](src/patterns/implementations/proxyProvider.ts)
+**See**: [proxyProvider.ts](../src/patterns/implementations/proxyProvider.ts)
 
 ## 🛠️ Development Workflow
 

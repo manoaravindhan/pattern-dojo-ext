@@ -161,7 +161,7 @@ Then make code changes and see errors update in real-time!
 4. Debugger stops at breakpoint
 
 ### Add Custom Pattern
-See [DEVELOPMENT.md](DEVELOPMENT.md#how-to-add-custom-patterns) for examples.
+See [DEVELOPMENT.md](DEVELOPMENT.md#adding-new-patterns) for examples.
 
 ### Refresh Analysis
 Use Command Palette (Ctrl+Shift+P):
@@ -202,7 +202,7 @@ pattern-dojo/                    # Your project folder
 **A:** Set `"pattern-dojo.enabled": false` in settings
 
 ### Q: Can I add custom patterns?
-**A:** Yes! See [DEVELOPMENT.md](DEVELOPMENT.md#how-to-add-new-patterns)
+**A:** Yes! See [DEVELOPMENT.md](DEVELOPMENT.md#adding-new-patterns)
 
 ### Q: Which languages are supported?
 **A:** JavaScript, TypeScript, Java, Python, C#
@@ -233,7 +233,7 @@ pattern-dojo/                    # Your project folder
 
 | File | Purpose |
 |------|---------|
-| [README.md](README.md) | Project overview |
+| [README.md](../README.md) | Project overview |
 | [GETTING_STARTED.md](GETTING_STARTED.md) | Installation & usage |
 | [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Cheat sheet |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Architecture & building |
