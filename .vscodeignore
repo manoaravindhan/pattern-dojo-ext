@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build outputs
+dist/
+*.vsix
+
+# Source files (we only need compiled JS)
+src/
+*.ts
+tsconfig.json
+
+# Development
+.vscode/
+.git/
+.github/
+.gitignore
+*.log
+
+# Testing
+test/
+*.test.js
+coverage/
+
+# Config files
+webpack.config.js
+.eslintrc.json
+.eslintignore
+package.json
+package-lock.json
+
+# Documentation
+*.md
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+examples/
