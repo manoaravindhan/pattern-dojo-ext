@@ -34,7 +34,8 @@
       "pattern-dojo-activity": [
         {
           "id": "pattern-dojo.welcome",
-          "name": "Welcome"
+          "name": "Welcome",
+          "icon": "icon.png"
         }
       ]
     },

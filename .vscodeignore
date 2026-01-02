@@ -27,7 +27,6 @@ coverage/
 webpack.config.js
 .eslintrc.json
 .eslintignore
-package.json
 package-lock.json
 
 # Documentation
