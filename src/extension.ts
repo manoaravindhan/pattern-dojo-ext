@@ -3,6 +3,7 @@ import { PatternAnalyzer } from './analyzer/patternAnalyzer';
 import { patternRegistry } from './analyzer/patternRegistry';
 import PatternCodeActionProvider, { PatternCodeActionProvider as PatternCodeActionProviderClass } from './codeActions/patternCodeActions';
 import { createBuiltInProviders } from './patterns';
+import { WelcomeViewProvider } from './views/welcomeViewProvider';
 
 let analyzer: PatternAnalyzer;
 let disposables: vscode.Disposable[] = [];
@@ -12,6 +13,16 @@ let disposables: vscode.Disposable[] = [];
  */
 export function activate(context: vscode.ExtensionContext) {
   console.log('Pattern Dojo extension is now active!');
+
+  // Register welcome view
+  const welcomeProvider = new WelcomeViewProvider(context.extensionUri);
+  disposables.push(
+    vscode.window.registerWebviewViewProvider(
+      WelcomeViewProvider.viewType,
+      welcomeProvider,
+      { webviewOptions: { retainContextWhenHidden: true } }
+    )
+  );
 
   // Register all built-in pattern providers
   const providers = createBuiltInProviders();

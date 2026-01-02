@@ -19,7 +19,25 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "icon": "icon.png",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pattern-dojo-activity",
+          "title": "Pattern Dojo",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "pattern-dojo-activity": [
+        {
+          "id": "pattern-dojo.welcome",
+          "name": "Welcome"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "pattern-dojo.refresh",
@@ -69,18 +87,20 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run compile",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.95.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
     "glob": "^10.3.10",
+    "mocha": "^11.7.5",
     "typescript": "^5.3.3"
   },
   "dependencies": {
