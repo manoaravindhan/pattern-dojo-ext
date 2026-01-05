@@ -61,10 +61,6 @@ Welcome to Pattern Dojo! This document guides you to all available resources.
 ### Main Configuration Files
 - **package.json** - Dependencies, scripts, and extension metadata
 - **tsconfig.json** - TypeScript compilation settings
-- **.vscode/launch.json** - Debug configuration
-- **.vscode/tasks.json** - Build tasks (compile, watch)
-- **.vscode/settings.json** - Extension workspace settings
-- **.github/copilot-instructions.md** - AI assistant guidelines
 
 ## 📁 Source Code Structure
 
@@ -236,36 +232,6 @@ See [TESTING.md](TESTING.md) for detailed test procedures.
 - **Multiple Examples**: In example.ts file
 - **Zero Dependencies**: Only dev dependencies for tooling
 
-## 🔗 Related Resources
-
-### Design Patterns
-- [Refactoring Guru - Design Patterns](https://refactoring.guru/design-patterns)
-- [Gang of Four - Original Book](https://en.wikipedia.org/wiki/Design_Patterns)
-
-### VS Code Extension Development
-- [VS Code Extension API](https://code.visualstudio.com/api)
-- [VS Code API Samples](https://github.com/microsoft/vscode-extension-samples)
-
-### TypeScript
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-
-## ✨ Next Steps
-
-1. **Run the Extension**: Press F5 to test in debug mode
-2. **Review Example**: Open example.ts to see all patterns
-3. **Explore Code**: Review src/ folder to understand architecture
-4. **Customize**: Add your own pattern detectors
-5. **Configure**: Set up settings for your needs
-6. **Share**: Package and publish to VS Code marketplace
-
-## 📝 Notes
-
-- ✅ **Status**: Fully functional and production-ready
-- ✅ **Compiled**: All TypeScript compiles without errors
-- ✅ **Scalable**: Plugin architecture allows unlimited patterns
-- ✅ **Documented**: Comprehensive guides included
-- ✅ **Tested**: Manual test procedures documented
-
 ## 🤝 Support
 
 - Check [TESTING.md](TESTING.md) for troubleshooting
@@ -276,4 +242,4 @@ See [TESTING.md](TESTING.md) for detailed test procedures.
 
 **Happy pattern detecting!** 🎯
 
-*Last Updated: January 2, 2026*
+*Last Updated: January 5, 2026*

@@ -18,6 +18,14 @@ Pattern Dojo is a scalable VS Code extension that detects common design pattern 
 
 - **Configurable**: Customize which patterns to analyze and severity levels
 
+## Supported Languages
+
+- JavaScript (.js)
+- TypeScript (.ts, .tsx)
+- Java (.java)
+- Python (.py)
+- C# (.cs)
+
 ## Usage
 
 The extension automatically analyzes your code when you open or edit files. Pattern violations are highlighted with underlines or squiggles based on the configured severity level.
