@@ -2,6 +2,10 @@
 
 Pattern Dojo is a scalable VS Code extension that detects common design pattern violations and anti-patterns in your code, highlighting them for easy identification and refactoring.
 
+
+![VS Code window displaying Pattern Dojo extension detecting design pattern violations in TypeScript code. The editor shows a Database class with a singleton pattern issue highlighted in yellow. The Problems panel at the bottom lists seven pattern violations including singleton non-private constructor, observer unsubscribed event listener, and multiple strategy pattern long if-else chains. The interface demonstrates real-time code analysis with diagnostic messages and pattern suggestions.](images/demo.gif)
+
+
 ## Features
 
 - **Pattern Detection**: Automatically detects violations of common design patterns including:

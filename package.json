@@ -98,7 +98,7 @@
     "pretest": "npm run compile",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "package": "vsce package -o dist"
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
