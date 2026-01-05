@@ -3,6 +3,7 @@
   "displayName": "Pattern Dojo",
   "description": "Detects design pattern issues and highlights them with a scalable architecture",
   "version": "0.0.1",
+  "publisher": "vivarium-labs",
   "license": "MIT",
   "repository": {
     "type": "git",
