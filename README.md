@@ -59,6 +59,10 @@ Configure Pattern Lens in your VS Code settings:
 }
 ```
 
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
+
 ## License
 
 MIT
