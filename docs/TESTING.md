@@ -255,6 +255,4 @@ npm run compile
 Files:
 
 - `examples/ts/example.ts`
-- `examples/java/Example.java`
-- `examples/python/example.py`
-- `examples/csharp/Example.cs`
+- `examples/js/example.js`

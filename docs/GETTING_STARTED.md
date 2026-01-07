@@ -228,9 +228,7 @@ MIT
 Open the language-specific examples under the `examples/` folder to see pattern violations in action. Recommended files:
 
 - `examples/ts/example.ts` — TypeScript examples covering singleton, factory, observer, strategy
-- `examples/java/Example.java` — Java examples
-- `examples/python/example.py` — Python examples
-- `examples/csharp/Example.cs` — C# examples
+- `examples/js/example.js` — JavaScript examples covering singleton, factory, observer, strategy
 
 To run locally:
 

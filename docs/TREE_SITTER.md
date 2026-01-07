@@ -20,9 +20,6 @@ The Tree-Sitter base layer provides a unified architecture for supporting patter
    - Converts language-specific AST to CommonAST format
 
 3. **Language Adapters** (`src/languages/adapters/`)
-   - **JavaAdapter**: Supports `.java` files
-   - **PythonAdapter**: Supports `.py` files
-   - **CSharpAdapter**: Supports `.cs` files
    - Each adapter translates that language's syntax to CommonAST nodes
 
 4. **LanguageAdapterRegistry** (`src/languages/languageAdapterRegistry.ts`)
@@ -43,24 +40,24 @@ The Tree-Sitter base layer provides a unified architecture for supporting patter
 ### Parsing Flow
 
 ```
-Document (e.g., MyClass.java)
+Document (e.g., MyClass.ts)
        ↓
 LanguageAdapterRegistry (detects file type)
        ↓
-JavaLanguageAdapter (language-specific parsing)
+TypeScriptLanguageAdapter (language-specific parsing)
        ↓
 CommonAST (unified format)
        ↓
-Multi-Language Providers (pattern detection)
+Pattern Providers (pattern detection)
        ↓
 Diagnostics
 ```
 
-### Example: Detecting Singleton in Java and Python
+### Example: Detecting Singleton in TypeScript
 
 ```typescript
-// Same detector code works for both languages
-class MultiLanguageSingletonProvider implements PatternProvider {
+// Detector code works for TypeScript and JavaScript
+class SingletonPatternProvider implements PatternProvider {
   analyze(document: vscode.TextDocument): PatternViolation[] {
     const parseResult = languageAdapterRegistry.parse(document);
     const { rootNode } = parseResult;
@@ -72,9 +69,9 @@ class MultiLanguageSingletonProvider implements PatternProvider {
 }
 
 // Automatically works for:
-// - Java: public class Singleton { public Singleton() {} }
-// - Python: class Singleton: def __init__(self): pass
-// - C#: public class Singleton { public Singleton() {} }
+// - TypeScript: export class Singleton { public constructor() {} }
+// - JavaScript: export class Singleton { constructor() {} }
+// - TSX/JSX: Fully supported with React components
 ```
 
 ## Adding a New Language
@@ -112,45 +109,36 @@ this.registerAdapter(new GoLanguageAdapter());
 
 ### Step 3: Use with Existing Providers
 
-All multi-language providers automatically work with the new language!
+All pattern providers automatically work with the new language!
 
-## Current Limitations
+## Current Implementation
 
-The current implementation uses regex-based fallback parsing for demonstration. For production use:
+The current implementation is focused on TypeScript and JavaScript:
 
-1. **Integrate real Tree-Sitter parsers**:
-   - Install: `npm install web-tree-sitter tree-sitter-java tree-sitter-python tree-sitter-c-sharp`
-   - Replace regex patterns with proper AST traversal
-
-2. **Symbol Resolution**:
-   - Current: Single-file only
-   - Production: Cross-file symbol table, type inference, scope resolution
-
-3. **Type Information**:
-   - Current: Basic metadata extraction
-   - Production: Full type checker integration per language
+1. **Real Tree-Sitter parsing** with `web-tree-sitter` and `tree-sitter-typescript`
+2. **Single-file symbol resolution** with type information extraction
+3. **CommonAST interface** for pattern provider compatibility
 
 ## Next Steps
 
-1. **Replace regex fallbacks with real Tree-Sitter parsers**
-2. **Implement cross-file symbol resolution**
-3. **Add type inference for each language**
-4. **Expand multi-language providers** (Observer, Strategy, Facade, Proxy, Adapter)
-5. **Create language-specific provider templates** for plugin authors
-6. **Performance optimization** via caching and incremental analysis
+1. **Cross-file symbol resolution** via workspace symbol index
+2. **Type inference integration** with TypeScript compiler API
+3. **Scope analysis** for variable visibility detection
+4. **Performance optimization** via caching and incremental analysis
+5. **Support for additional languages** (Go, Rust, etc.) via new adapters
 
-## Example: Full Tree-Sitter Integration
+## Example: TypeScript Tree-Sitter Integration
 
 ```typescript
 import Parser from 'web-tree-sitter';
-import Java from 'web-tree-sitter-java';
+import TypeScript from 'tree-sitter-typescript';
 
-export class JavaLanguageAdapter implements LanguageAdapter {
+export class TypeScriptLanguageAdapter implements LanguageAdapter {
   private parser: Parser;
 
   constructor() {
     this.parser = new Parser();
-    this.parser.setLanguage(Java);
+    this.parser.setLanguage(TypeScript.language);
   }
 
   parse(filePath: string, sourceCode: string): ParseResult {
@@ -160,7 +148,7 @@ export class JavaLanguageAdapter implements LanguageAdapter {
 
   private convertToCommonAST(node: Parser.SyntaxNode, source: string): CommonASTNode {
     // Recursively convert Tree-Sitter nodes to CommonAST
-    // Handle Java-specific node types (class_declaration, method_declaration, etc.)
+    // Handle TypeScript-specific node types (class_declaration, method_definition, etc.)
     // Extract metadata and build symbol table
   }
 }
@@ -168,13 +156,13 @@ export class JavaLanguageAdapter implements LanguageAdapter {
 
 ## Benefits
 
-✅ **Single Pattern Implementation**: Write once, run on all languages
-✅ **Extensible**: Add new languages without modifying pattern logic
+✅ **Unified Pattern Implementation**: Pattern logic works across supported languages
+✅ **Extensible**: Add new languages without modifying pattern detection logic
 ✅ **Type-Safe**: CommonAST interface prevents language-specific bugs
-✅ **Scalable**: Adapters can be swapped (regex → Tree-Sitter → Language Server)
-✅ **Backward Compatible**: Coexists with language-specific TypeScript providers
+✅ **Scalable**: Adapters can be upgraded (regex → Tree-Sitter → Language Server)
+✅ **Focused**: Currently optimized for TypeScript/JavaScript ecosystem
 
 ## References
 
 - [Tree-Sitter Documentation](https://tree-sitter.github.io)
-- [Available Languages](https://tree-sitter.github.io/tree-sitter/creating-parsers#list-of-languages)
+- [Tree-Sitter TypeScript](https://github.com/tree-sitter/tree-sitter-typescript)

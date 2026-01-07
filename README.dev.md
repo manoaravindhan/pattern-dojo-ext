@@ -95,10 +95,8 @@ MIT
 ## Examples
 
 - Try the examples in the `examples/` folder for quick demos:
-  - JavaScript/TypeScript: examples/ts/example.ts
-  - Java: examples/java/Example.java
-  - Python: examples/python/example.py
-  - C#: examples/csharp/Example.cs
+  - TypeScript: examples/ts/example.ts
+  - JavaScript: examples/js/example.js
 
 Run the example flow locally:
 

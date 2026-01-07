@@ -174,7 +174,7 @@ vsce publish
 
 ## Examples
 
-Open `examples/ts/example.ts`, `examples/java/Example.java`, `examples/python/example.py`, or `examples/csharp/Example.cs` to see quick pattern demos. To compile and run the extension locally:
+Open `examples/ts/example.ts` or `examples/js/example.js` to see quick pattern demos. To compile and run the extension locally:
 
 ```bash
 npm install

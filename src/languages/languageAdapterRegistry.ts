@@ -4,19 +4,29 @@
  */
 
 import { LanguageAdapter } from './languageAdapter';
-import { JavaLanguageAdapter } from './adapters/javaAdapter';
-import { PythonLanguageAdapter } from './adapters/pythonAdapter';
-import { CSharpLanguageAdapter } from './adapters/csharpAdapter';
 import { ParseResult } from './commonAst';
 import * as vscode from 'vscode';
 
+/**
+ * Language adapter registry for managing multi-language parsing.
+ * 
+ * Currently focused on TypeScript/JavaScript analysis.
+ * 
+ * Future language support can be added by:
+ * 1. Creating new adapter classes implementing LanguageAdapter interface
+ * 2. Registering them in the constructor: this.registerAdapter(new MyLanguageAdapter())
+ * 3. Adding activation events and language IDs to package.json
+ * 
+ * Example: Adding additional language support
+   * - Create src/languages/adapters/languageAdapter.ts implementing LanguageAdapter
+ * - Register in constructor and update package.json activation events
+ */
 export class LanguageAdapterRegistry {
   private adapters: LanguageAdapter[] = [];
 
   constructor() {
-    this.registerAdapter(new JavaLanguageAdapter());
-    this.registerAdapter(new PythonLanguageAdapter());
-    this.registerAdapter(new CSharpLanguageAdapter());
+    // Currently no language adapters registered - TypeScript/JavaScript analysis only
+    // Future adapters can be registered here
   }
 
   /**
@@ -50,6 +60,13 @@ export class LanguageAdapterRegistry {
     if (!adapter) return undefined;
 
     return Promise.resolve(adapter.parse(document.fileName, document.getText()));
+  }
+
+  /**
+   * Initialize all registered adapters to ensure parsers are ready.
+   */
+  async initAll(): Promise<void> {
+    await Promise.all(this.adapters.map(a => Promise.resolve(a.init?.() as Promise<void>)));
   }
 
   /**

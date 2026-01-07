@@ -19,13 +19,11 @@
   ],
   "activationEvents": [
     "onStartupFinished",
+    "onView:pattern-dojo-activity",
     "onLanguage:javascript",
     "onLanguage:typescript",
     "onLanguage:javascriptreact",
-    "onLanguage:typescriptreact",
-    "onLanguage:java",
-    "onLanguage:python",
-    "onLanguage:csharp"
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -50,11 +48,45 @@
     "commands": [
       {
         "command": "pattern-lens.refresh",
-        "title": "Refresh Pattern Analysis"
+        "title": "Refresh Pattern Analysis",
+        "icon": "$(refresh)",
+        "category": "Pattern Lens"
       },
       {
         "command": "pattern-lens.reportIssue",
-        "title": "Report Pattern Issue"
+        "title": "Report Pattern Issue",
+        "icon": "$(feedback)",
+        "category": "Pattern Lens"
+      },
+      {
+        "command": "pattern-lens.disablePatternWorkspace",
+        "title": "Disable Pattern",
+        "icon": "$(close)",
+        "category": "Pattern Lens"
+      },
+      {
+        "command": "pattern-lens.enablePatternWorkspace",
+        "title": "Enable Pattern",
+        "icon": "$(check)",
+        "category": "Pattern Lens"
+      },
+      {
+        "command": "pattern-lens.setPatternSeverityWorkspace",
+        "title": "Set Pattern Severity",
+        "icon": "$(warning)",
+        "category": "Pattern Lens"
+      },
+      {
+        "command": "pattern-lens.managePatterns",
+        "title": "Manage Enabled Patterns",
+        "icon": "$(settings-gear)",
+        "category": "Pattern Lens"
+      },
+      {
+        "command": "pattern-lens.toggleExtension",
+        "title": "Toggle Pattern Lens",
+        "icon": "$(power)",
+        "category": "Pattern Lens"
       }
     ],
     "configuration": {
@@ -119,9 +151,5 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "tree-sitter-c-sharp": "^0.23.1",
-    "tree-sitter-java": "^0.23.5",
-    "tree-sitter-python": "^0.25.0",
-    "web-tree-sitter": "^0.26.3"
   }
 }

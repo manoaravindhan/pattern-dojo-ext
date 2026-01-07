@@ -118,7 +118,7 @@ export class PatternCodeActionProvider implements vscode.CodeActionProvider {
     const line = range.start.line;
     const pos = new vscode.Position(line, 0);
     const langId = document.languageId;
-    const comment = langId === 'python' ? '# pattern-lens-disable-next-line\n' : '// pattern-lens-disable-next-line\n';
+    const comment = '// pattern-lens-disable-next-line\n';
     edit.insert(document.uri, pos, comment);
     return edit;
   }

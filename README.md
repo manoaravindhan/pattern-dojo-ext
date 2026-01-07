@@ -26,9 +26,10 @@ Pattern Lens is a scalable VS Code extension that detects common design pattern 
 
 - JavaScript (.js)
 - TypeScript (.ts, .tsx)
-- Java (.java)
-- Python (.py)
-- C# (.cs)
+
+## Extensibility
+
+Support for additional languages can be added through the extension's architecture.
 
 ## Usage
 

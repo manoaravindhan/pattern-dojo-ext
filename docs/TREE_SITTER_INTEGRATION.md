@@ -1,31 +1,19 @@
-# Real Tree-Sitter Integration Guide
+# Tree-Sitter Integration Guide
 
 ## Overview
 
-Pattern Lens now includes **real Tree-Sitter parsers** for Java, Python, and C#. The regex-based fallback has been replaced with accurate AST parsing using the `tree-sitter-*` npm packages.
+Pattern Lens uses **Tree-Sitter** for accurate AST (Abstract Syntax Tree) parsing. Currently focused on TypeScript and JavaScript with full support for both syntax variants.
 
-## What's Changed
+## What We Use
 
-### Before (Regex Fallback)
+### Current Implementation
 ```typescript
-// Pattern matching with regex
-const classRegex = /public\s+(abstract\s+)?class\s+(\w+)(\s+extends\s+(\w+))?/gm;
-while ((match = classRegex.exec(sourceCode)) !== null) {
-  // Create AST nodes from regex matches
-}
-```
+import Parser from 'web-tree-sitter';
+import TypeScript from 'tree-sitter-typescript';
 
-**Issues:**
-- False positives (matches comments, strings)
-- Can't handle complex syntax
-- No symbol resolution
-- Limited to simple patterns
-
-### After (Tree-Sitter)
-```typescript
 await (Parser as any).init();
 this.parser = new (Parser as any)();
-this.parser.setLanguage(Java);
+this.parser.setLanguage(TypeScript.language);
 const tree = this.parser.parse(sourceCode);
 const rootNode = this.convertToCommonAST(tree.rootNode, sourceCode);
 ```
@@ -36,23 +24,20 @@ const rootNode = this.convertToCommonAST(tree.rootNode, sourceCode);
 ✅ Full syntax support
 ✅ Symbol resolution
 ✅ Position tracking (line/column)
+✅ JSX and TSX support
 
 ## Installed Packages
 
-```bash
-npm install web-tree-sitter tree-sitter-java tree-sitter-python tree-sitter-c-sharp --save
-```
+Pattern Lens includes these Tree-Sitter dependencies:
 
 - **web-tree-sitter**: Core parser runtime (WebAssembly-based)
-- **tree-sitter-java**: Java language parser
-- **tree-sitter-python**: Python language parser
-- **tree-sitter-c-sharp**: C# language parser
+- **tree-sitter-typescript**: TypeScript and JavaScript language parser
 
 ## Architecture
 
-### Language Adapters (Real Implementation)
+### Language Adapters
 
-Each adapter now uses real Tree-Sitter:
+The pattern analyzer uses Tree-Sitter for TypeScript and JavaScript:
 
 1. **Initialization** (async)
    ```typescript
@@ -63,7 +48,7 @@ Each adapter now uses real Tree-Sitter:
    private async initParser(): Promise<any> {
      await (Parser as any).init();
      this.parser = new (Parser as any)();
-     this.parser.setLanguage(Java); // or Python, CSharp
+     this.parser.setLanguage(TypeScript.language);
      return this.parser;
    }
    ```
@@ -82,46 +67,28 @@ Each adapter now uses real Tree-Sitter:
 
 ### Node Kind Mapping
 
-Each adapter maps language-specific node types to common kinds:
+The adapter maps TypeScript/JavaScript node types to common kinds:
 
-**Java**
+**TypeScript/JavaScript**
 ```typescript
 class_declaration → NodeKind.ClassDeclaration
-method_declaration → NodeKind.MethodDeclaration
+method_definition → NodeKind.MethodDeclaration
 constructor_declaration → NodeKind.ConstructorDeclaration
-object_creation_expression → NodeKind.NewExpression
+new_expression → NodeKind.NewExpression
 // ... more mappings
 ```
 
-**Python**
-```typescript
-class_definition → NodeKind.ClassDeclaration
-function_definition → NodeKind.MethodDeclaration
-call → NodeKind.CallExpression
-attribute → NodeKind.MemberAccess
-// ... more mappings
-```
+## How Pattern Providers Work
 
-**C#**
-```typescript
-class_declaration → NodeKind.ClassDeclaration
-method_declaration → NodeKind.MethodDeclaration
-constructor_declaration → NodeKind.ConstructorDeclaration
-invocation_expression → NodeKind.CallExpression
-// ... more mappings
-```
-
-## How Multi-Language Providers Work
-
-Multi-language providers now receive accurate CommonAST nodes:
+Pattern providers receive accurate CommonAST nodes:
 
 ```typescript
-export class MultiLanguageSingletonProvider implements PatternProvider {
+export class SingletonPatternProvider implements PatternProvider {
   analyze(document: vscode.TextDocument): PatternViolation[] {
     const parseResult = languageAdapterRegistry.parse(document);
     const { rootNode } = parseResult;
 
-    // Walk CommonAST (works for all languages!)
+    // Walk CommonAST
     const visit = (node: CommonASTNode) => {
       if (node.kind === NodeKind.ClassDeclaration) {
         // Accurate class analysis
@@ -145,7 +112,7 @@ export class MultiLanguageSingletonProvider implements PatternProvider {
 
 ## Symbol Resolution
 
-Each adapter builds a symbol table during parsing:
+The adapter builds a symbol table during parsing:
 
 ```typescript
 private extractSymbols(
@@ -179,16 +146,16 @@ private extractSymbols(
 ### Example: Singleton Detection
 
 **Before (Regex)**
-```java
+```typescript
 // Matches public class even in comments
-// public class MyClass extends Singleton { }
-public class Singleton {
-  public Singleton() {} // False positive!
+// public class MyClass { }
+export class Singleton {
+  public constructor() {} // False positive!
 }
 ```
 
 **After (Tree-Sitter)**
-- Correctly ignores comment
+- Correctly ignores comments
 - Only parses actual class declarations
 - Accurate modifier detection (public vs private)
 - No false positives
@@ -196,8 +163,8 @@ public class Singleton {
 ### Example: Factory Detection
 
 **Before (Regex)**
-```java
-String result = "new MyClass()" // False match
+```typescript
+const result = "new MyClass()" // False match
 ```
 
 **After (Tree-Sitter)**
@@ -223,10 +190,10 @@ For typical files (<10K lines), parsing takes < 100ms.
    - Track imports/dependencies
    - Enable multi-file pattern detection
 
-2. **Type Inference**
-   - Java: Use JDWP or Gradle API
-   - Python: Use type hints + inference
-   - C#: Use Roslyn for semantic analysis
+2. **Enhanced Type Inference**
+   - Use TypeScript compiler API
+   - Track type information
+   - Improve semantic analysis
 
 3. **Scope Analysis**
    - Track variable/class visibility
@@ -266,6 +233,4 @@ If analysis is slow:
 
 - [Tree-Sitter Documentation](https://tree-sitter.github.io)
 - [Web Tree-Sitter](https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_web)
-- [Java Grammar](https://github.com/tree-sitter/tree-sitter-java)
-- [Python Grammar](https://github.com/tree-sitter/tree-sitter-python)
-- [C# Grammar](https://github.com/tree-sitter/tree-sitter-c-sharp)
+- [TypeScript Grammar](https://github.com/tree-sitter/tree-sitter-typescript)

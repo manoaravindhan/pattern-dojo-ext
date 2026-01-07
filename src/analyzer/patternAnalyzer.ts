@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { PatternViolation, AnalysisConfig } from '../types';
 import { PatternRegistry } from './patternRegistry';
+import { languageAdapterRegistry } from '../languages/languageAdapterRegistry';
 
 /**
  * Main analyzer engine that coordinates pattern detection
@@ -14,6 +15,18 @@ export class PatternAnalyzer {
     this.registry = registry;
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection('pattern-lens');
     this.config = this.loadConfig();
+  }
+
+  /**
+   * Initialize analyzers and language parsers.
+   * Must be awaited before first analysis to avoid parser race conditions.
+   */
+  async init(): Promise<void> {
+    try {
+      await languageAdapterRegistry.initAll();
+    } catch (e) {
+      console.error('PatternAnalyzer init failed:', e);
+    }
   }
 
   /**
@@ -201,7 +214,7 @@ export class PatternAnalyzer {
    * Check if language is supported
    */
   isSupportedLanguage(languageId: string): boolean {
-    const supportedLanguages = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'java', 'python', 'csharp'];
+    const supportedLanguages = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact'];
     return supportedLanguages.includes(languageId);
   }
 
