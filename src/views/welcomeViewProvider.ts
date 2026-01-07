@@ -1,15 +1,14 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 export class WelcomeViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'pattern-dojo.welcome';
+  public static readonly viewType = 'pattern-lens.welcome';
   private _view?: vscode.WebviewView;
 
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
-    context: vscode.WebviewViewResolveContext,
+    _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
   ) {
     this._view = webviewView;
@@ -27,10 +26,10 @@ export class WelcomeViewProvider implements vscode.WebviewViewProvider {
           vscode.commands.executeCommand('vscode.open', vscode.Uri.file(data.file));
           break;
         case 'openSettings':
-          vscode.commands.executeCommand('workbench.action.openSettings', '@ext:pattern-dojo');
+          vscode.commands.executeCommand('workbench.action.openSettings', '@ext:pattern-lens');
           break;
         case 'runExample':
-          vscode.commands.executeCommand('pattern-dojo.refresh');
+          vscode.commands.executeCommand('pattern-lens.refresh');
           break;
       }
     });
@@ -46,7 +45,7 @@ export class WelcomeViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pattern Dojo Welcome</title>
+    <title>Pattern Lens Welcome</title>
     <link rel="stylesheet" href="${styleUri}">
     <style>
         body {
@@ -191,7 +190,7 @@ export class WelcomeViewProvider implements vscode.WebviewViewProvider {
         <div class="header">
             <div class="logo">🎯</div>
             <div>
-                <h1 class="title">Pattern Dojo</h1>
+                <h1 class="title">Pattern Lens</h1>
                 <p class="subtitle">Design Pattern Detector</p>
             </div>
         </div>
@@ -200,7 +199,7 @@ export class WelcomeViewProvider implements vscode.WebviewViewProvider {
             <div class="section-title">What it does</div>
             <div class="section-content">
                 <p style="margin: 0 0 12px 0; font-size: 13px;">
-                    Pattern Dojo automatically detects design pattern violations and anti-patterns in your code.
+                    Pattern Lens automatically detects design pattern violations and anti-patterns in your code.
                 </p>
                 <ul class="feature-list">
                     <li>Singleton issues</li>

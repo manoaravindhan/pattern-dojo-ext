@@ -45,11 +45,11 @@ export class LanguageAdapterRegistry {
   /**
    * Parse a document with the appropriate adapter
    */
-  parse(document: vscode.TextDocument): ParseResult | undefined {
+  async parse(document: vscode.TextDocument): Promise<ParseResult | undefined> {
     const adapter = this.getAdapter(document.fileName);
     if (!adapter) return undefined;
 
-    return adapter.parse(document.fileName, document.getText());
+    return Promise.resolve(adapter.parse(document.fileName, document.getText()));
   }
 
   /**

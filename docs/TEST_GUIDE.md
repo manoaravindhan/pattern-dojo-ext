@@ -2,7 +2,7 @@
 
 ## Overview
 
-Pattern Dojo includes a comprehensive test suite using **Mocha** and **Node.js assert** module. Tests cover:
+Pattern Lens includes a comprehensive test suite using **Mocha** and **Node.js assert** module. Tests cover:
 
 - All 8 pattern detectors (Singleton, Factory, Observer, Strategy, Decorator, Adapter, Facade, Proxy)
 - Pattern registry functionality

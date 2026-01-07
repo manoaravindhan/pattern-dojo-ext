@@ -19,7 +19,7 @@ export interface LanguageAdapter {
   /**
    * Parse source code and return common AST
    */
-  parse(filePath: string, sourceCode: string): ParseResult;
+  parse(filePath: string, sourceCode: string): Promise<ParseResult> | ParseResult;
 
   /**
    * Find symbol definitions by name (for cross-file resolution)

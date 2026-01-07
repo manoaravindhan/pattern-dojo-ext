@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { PatternProvider, PatternViolation, AnalysisConfig } from '../types';
+import { PatternViolation, AnalysisConfig } from '../types';
 import { PatternRegistry } from './patternRegistry';
 
 /**
@@ -12,7 +12,7 @@ export class PatternAnalyzer {
 
   constructor(registry: PatternRegistry) {
     this.registry = registry;
-    this.diagnosticCollection = vscode.languages.createDiagnosticCollection('pattern-dojo');
+    this.diagnosticCollection = vscode.languages.createDiagnosticCollection('pattern-lens');
     this.config = this.loadConfig();
   }
 
@@ -20,20 +20,53 @@ export class PatternAnalyzer {
    * Load configuration from VS Code settings
    */
   private loadConfig(): AnalysisConfig {
-    const workspaceConfig = vscode.workspace.getConfiguration('pattern-dojo');
+    const workspaceConfig = vscode.workspace.getConfiguration('pattern-lens');
+    
+    // Default patterns map
+    const defaultPatterns: Record<string, boolean> = {
+        singleton: true, factory: true, observer: true, strategy: true,
+        decorator: true, adapter: true, facade: true, proxy: true
+    };
+    
+    // Default severity map
+    const defaultSeverity: Record<string, 'error' | 'warning' | 'information'> = {
+        singleton: 'warning', factory: 'information', observer: 'warning',
+        strategy: 'information', decorator: 'information', adapter: 'information',
+        facade: 'information', proxy: 'information'
+    };
+
+    // Robustly handle config types (in case of legacy/mixed settings)
+    const patternsConfig = workspaceConfig.get('patterns');
+    const severityConfig = workspaceConfig.get('severity');
+
+    let patterns = defaultPatterns;
+    if (patternsConfig && typeof patternsConfig === 'object' && !Array.isArray(patternsConfig)) {
+        patterns = { ...defaultPatterns, ...patternsConfig };
+    } else if (Array.isArray(patternsConfig)) {
+        // Legacy array support: map array items to true
+        patterns = { ...defaultPatterns }; // Start with defaults
+        // Reset defaults to false? No, usually legacy array implied "only these are enabled" or "these are added to default"?
+        // Usually array list replaces defaults.
+        // Let's assume if array is provided, we disable all defaults and enable only present ones? 
+        // Or better, just enable what's in array.
+        Object.keys(patterns).forEach(k => patterns[k] = false);
+        patternsConfig.forEach((p: string) => { if(typeof p === 'string') patterns[p] = true; });
+    }
+
+    let severity = defaultSeverity;
+    if (severityConfig && typeof severityConfig === 'object') {
+        severity = { ...defaultSeverity, ...severityConfig };
+    } else if (typeof severityConfig === 'string') {
+        // Legacy string support: apply to all
+        const level = severityConfig as 'error' | 'warning' | 'information';
+        Object.keys(severity).forEach(k => severity[k] = level);
+    }
+
     return {
       enabled: workspaceConfig.get<boolean>('enabled') ?? true,
-      patterns: workspaceConfig.get<string[]>('patterns') ?? [
-        'singleton',
-        'factory',
-        'observer',
-        'strategy',
-        'decorator',
-        'adapter',
-        'facade',
-        'proxy',
-      ],
-      severity: (workspaceConfig.get<string>('severity') as 'error' | 'warning' | 'information') ?? 'warning',
+      patterns,
+      severity,
+      ignore: workspaceConfig.get<string[]>('ignore')
     };
   }
 
@@ -59,8 +92,31 @@ export class PatternAnalyzer {
     }
 
     try {
-      const providers = this.registry.getProviders(this.config.patterns);
-      let violations = this.registry.analyze(document, providers);
+      const enabledPatterns = Object.keys(this.config.patterns).filter(k => this.config.patterns[k]);
+      const providers = this.registry.getProviders(enabledPatterns);
+      
+      let violations: PatternViolation[] = [];
+
+      // Analyze per provider to apply specific configuration
+      for (const provider of providers) {
+          try {
+              const result = provider.analyze(document);
+              const providerViolations = result instanceof Promise ? await result : result;
+
+              // Apply severity from config
+              // provider.patternName corresponds to config keys (e.g. 'singleton')
+              const severitySetting = this.config.severity[provider.patternName] || 'warning';
+              const severityEnum = severitySetting === 'error' ? vscode.DiagnosticSeverity.Error : 
+                                   severitySetting === 'information' ? vscode.DiagnosticSeverity.Information : 
+                                   vscode.DiagnosticSeverity.Warning;
+              
+              providerViolations.forEach(v => { v.severity = severityEnum; });
+              
+              violations.push(...providerViolations);
+          } catch (e) {
+              console.error(`Error in provider ${provider.patternName}:`, e);
+          }
+      }
 
       // Filter based on ignore globs (basic filename match)
       if (this.config.ignore && this.config.ignore.length > 0) {
@@ -74,15 +130,6 @@ export class PatternAnalyzer {
 
       // Remove violations suppressed by inline comments
       violations = violations.filter(v => !this.isSuppressed(document, v));
-
-      // Apply per-pattern severity overrides
-      for (const v of violations) {
-        const codeStr = typeof v.code === 'string' ? v.code : String(v.code);
-        const override = this.config.patternSeverities && this.config.patternSeverities[codeStr];
-        if (override) {
-          v.severity = override === 'error' ? vscode.DiagnosticSeverity.Error : override === 'warning' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Information;
-        }
-      }
 
       const diagnostics = this.violationsToDiagnostics(violations);
       this.diagnosticCollection.set(document.uri, diagnostics);
@@ -102,8 +149,8 @@ export class PatternAnalyzer {
         violation.message,
         severity
       );
-      diagnostic.code = violation.code ?? 'pattern-dojo';
-      diagnostic.source = 'Pattern Dojo';
+      diagnostic.code = violation.code ?? 'pattern-lens';
+      diagnostic.source = 'Pattern Lens';
       if (violation.relatedInformation) {
         diagnostic.relatedInformation = violation.relatedInformation;
       }
@@ -121,8 +168,8 @@ export class PatternAnalyzer {
   /**
    * Detect suppression annotations in the source code.
    * Supports:
-   *  - // pattern-dojo-disable-next-line
-   *  - // pattern-dojo-disable <code>
+   *  - // pattern-lens-disable-next-line
+   *  - // pattern-lens-disable <code>
    */
   private isSuppressed(document: vscode.TextDocument, violation: PatternViolation): boolean {
     try {
@@ -130,12 +177,12 @@ export class PatternAnalyzer {
       // Check previous line for disable-next-line
       if (startLine > 0) {
         const prevLineText = document.lineAt(startLine - 1).text;
-        if (/pattern-dojo-disable-next-line/.test(prevLineText)) return true;
+        if (/pattern-lens-disable-next-line/.test(prevLineText)) return true;
       }
 
       // Check same line for inline disable
       const lineText = document.lineAt(startLine).text;
-      if (/pattern-dojo-disable/.test(lineText)) return true;
+      if (/pattern-lens-disable/.test(lineText)) return true;
 
       return false;
     } catch (e) {
@@ -144,9 +191,16 @@ export class PatternAnalyzer {
   }
 
   /**
+   * Get diagnostics for a URI
+   */
+  getDiagnostics(uri: vscode.Uri): readonly vscode.Diagnostic[] | undefined {
+    return this.diagnosticCollection.get(uri);
+  }
+
+  /**
    * Check if language is supported
    */
-  private isSupportedLanguage(languageId: string): boolean {
+  isSupportedLanguage(languageId: string): boolean {
     const supportedLanguages = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'java', 'python', 'csharp'];
     return supportedLanguages.includes(languageId);
   }

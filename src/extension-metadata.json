@@ -1,9 +1,9 @@
 {
-  "name": "Pattern Dojo",
-  "id": "pattern-dojo",
-  "version": "0.0.1",
+  "name": "Pattern Lens",
+  "id": "pattern-lens",
+  "version": "0.1.0",
   "private": true,
   "description": "VS Code test extension",
-  "publisher": "localhost",
-  "repository": "https://github.com/yourusername/pattern-dojo"
+  "publisher": "vivarium-labs",
+  "repository": "https://github.com/yourusername/pattern-lens"
 }

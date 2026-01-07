@@ -1,8 +1,9 @@
 {
-  "name": "pattern-dojo",
-  "displayName": "Pattern Dojo",
+  "name": "pattern-lens",
+  "displayName": "Pattern Lens",
   "description": "Detects design pattern issues and highlights them with a scalable architecture",
   "version": "0.0.1",
+  "icon": "images/icon.png",
   "publisher": "vivarium-labs",
   "license": "MIT",
   "repository": {
@@ -27,66 +28,69 @@
     "onLanguage:csharp"
   ],
   "main": "./out/extension.js",
-  "icon": "icon.png",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "pattern-dojo-activity",
-          "title": "Pattern Dojo",
-          "icon": "icon.png"
+          "id": "pattern-lens-activity",
+          "title": "Pattern Lens",
+          "icon": "images/icon.svg"
         }
       ]
     },
     "views": {
-      "pattern-dojo-activity": [
+      "pattern-lens-activity": [
         {
-          "id": "pattern-dojo.welcome",
+          "id": "pattern-lens.welcome",
           "name": "Welcome",
-          "icon": "icon.png"
+          "icon": "images/icon.svg"
         }
       ]
     },
     "commands": [
       {
-        "command": "pattern-dojo.refresh",
+        "command": "pattern-lens.refresh",
         "title": "Refresh Pattern Analysis"
       },
       {
-        "command": "pattern-dojo.reportIssue",
+        "command": "pattern-lens.reportIssue",
         "title": "Report Pattern Issue"
       }
     ],
     "configuration": {
-      "title": "Pattern Dojo",
+      "title": "Pattern Lens",
       "properties": {
-        "pattern-dojo.enabled": {
+        "pattern-lens.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable Pattern Dojo analysis"
+          "description": "Enable or disable Pattern Lens analysis"
         },
-        "pattern-dojo.patterns": {
-          "type": "array",
-          "default": [
-            "singleton",
-            "factory",
-            "observer",
-            "strategy",
-            "decorator",
-            "adapter",
-            "facade",
-            "proxy"
-          ],
-          "description": "Design patterns to analyze"
+        "pattern-lens.patterns": {
+          "type": "object",
+          "default": {
+            "singleton": true,
+            "factory": true,
+            "observer": true,
+            "strategy": true,
+            "decorator": true,
+            "adapter": true,
+            "facade": true,
+            "proxy": true
+          },
+          "description": "Enable or disable specific design patterns"
         },
-        "pattern-dojo.severity": {
-          "type": "string",
-          "enum": [
-            "error",
-            "warning",
-            "information"
-          ],
-          "default": "warning",
+        "pattern-lens.severity": {
+          "type": "object",
+          "default": {
+            "singleton": "warning",
+            "factory": "information",
+            "observer": "warning",
+            "strategy": "information",
+            "decorator": "information",
+            "adapter": "information",
+            "facade": "information",
+            "proxy": "information"
+          },
           "description": "Severity level for pattern violations"
         }
       }

@@ -1,8 +1,8 @@
 /**
- * Pattern Dojo - Example Code Demonstrating Design Pattern Issues
+ * Pattern Lens - Example Code Demonstrating Design Pattern Issues
  * 
- * This file contains various code patterns that Pattern Dojo will detect and highlight.
- * Open this file in VS Code with the Pattern Dojo extension enabled to see the detection in action.
+ * This file contains various code patterns that Pattern Lens will detect and highlight.
+ * Open this file in VS Code with the Pattern Lens extension enabled to see the detection in action.
  */
 
 // ============================================================================

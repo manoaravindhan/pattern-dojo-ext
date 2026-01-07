@@ -4,9 +4,9 @@
  */
 
 import Parser from 'web-tree-sitter';
-import * as Java from 'tree-sitter-java';
 import { CommonASTNode, NodeKind, ParseResult, Modifier, CommonSymbol } from '../commonAst';
 import { LanguageAdapter } from '../languageAdapter';
+import * as path from 'path';
 
 export class JavaLanguageAdapter implements LanguageAdapter {
   readonly extensions = ['.java'];
@@ -20,9 +20,20 @@ export class JavaLanguageAdapter implements LanguageAdapter {
 
   private async initParser(): Promise<any> {
     if (this.parser) return this.parser;
-    await (Parser as any).init();
+    
+    // Load main Tree-Sitter WASM
+    const mainWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter.wasm');
+    await (Parser as any).init({
+        locateFile: () => mainWasmPath
+    });
+
     this.parser = new (Parser as any)();
-    this.parser.setLanguage(Java);
+    
+    // Load Language WASM
+    const langWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter-java.wasm');
+    const lang = await (Parser as any).Language.load(langWasmPath);
+    
+    this.parser.setLanguage(lang);
     return this.parser;
   }
 
@@ -30,9 +41,13 @@ export class JavaLanguageAdapter implements LanguageAdapter {
     return filePath.endsWith('.java');
   }
 
-  parse(filePath: string, sourceCode: string): ParseResult {
+  async parse(filePath: string, sourceCode: string): Promise<ParseResult> {
     try {
-      // For synchronous parsing, we use cached parser if available
+      // Ensure parser is initialized
+      if (!this.parser) {
+        await this.parserReady;
+      }
+
       if (!this.parser) {
         return this.createEmptyResult(sourceCode);
       }
@@ -107,10 +122,34 @@ export class JavaLanguageAdapter implements LanguageAdapter {
   }
 
   private extractName(node: any, sourceCode: string): string | undefined {
+    // For object creation, look for type_identifier
+    if (node.type === 'object_creation_expression') {
+       for (let i = 0; i < node.childCount; i++) {
+         const child = node.child(i);
+         if (child.type === 'type_identifier' || child.type === 'identifier') {
+           return sourceCode.substring(child.startIndex, child.endIndex);
+         }
+       }
+    }
+
+    // For fields/variables, name is inside variable_declarator
+    if (node.type === 'field_declaration' || node.type === 'variable_declaration') {
+        for (let i = 0; i < node.childCount; i++) {
+            const child = node.child(i);
+            if (child.type === 'variable_declarator') {
+                 // variable_declarator has 'name' field
+                 const nameNode = child.childForFieldName('name');
+                 if (nameNode) {
+                     return sourceCode.substring(nameNode.startIndex, nameNode.endIndex);
+                 }
+            }
+        }
+    }
+
     // For declarations, look for identifier child
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
-      if (child && child.type === 'identifier') {
+      if (child && (child.type === 'identifier' || child.type === 'type_identifier')) {
         return sourceCode.substring(child.startIndex, child.endIndex);
       }
     }

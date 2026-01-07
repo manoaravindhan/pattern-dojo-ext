@@ -1,4 +1,4 @@
-# 🎯 Welcome to Pattern Dojo!
+# 🎯 Welcome to Pattern Lens!
 
 A production-ready VS Code extension that detects design pattern violations in your code.
 
@@ -89,7 +89,7 @@ The `example.ts` file demonstrates all 8 pattern violations:
 ### Create Your Own Test
 ```typescript
 // Open any .ts, .js, .java, .py, or .cs file
-// Add some code and see Pattern Dojo detect issues!
+// Add some code and see Pattern Lens detect issues!
 
 class MyClass {
   static instance = new MyClass();
@@ -105,27 +105,33 @@ class MyClass {
 Add to `.vscode/settings.json`:
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": [
-    "singleton",
-    "factory",
-    "observer",
-    "strategy",
-    "decorator",
-    "adapter",
-    "facade",
-    "proxy"
-  ],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": {
+    "singleton": true,
+    "factory": true,
+    "observer": true,
+    "strategy": true,
+    "decorator": true,
+    "adapter": true,
+    "facade": true,
+    "proxy": true
+  },
+  "pattern-lens.severity": {
+    "singleton": "warning"
+  }
 }
 ```
 
 ### Customize for Your Needs
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": ["singleton"],          // Only check Singleton
-  "pattern-dojo.severity": "error"                 // Show as errors
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": {
+      "singleton": true
+  },          // Only check Singleton
+  "pattern-lens.severity": {
+      "singleton": "error"
+  }                 // Show as errors
 }
 ```
 
@@ -165,7 +171,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md#adding-new-patterns) for examples.
 
 ### Refresh Analysis
 Use Command Palette (Ctrl+Shift+P):
-- Type "Pattern Dojo: Refresh"
+- Type "Pattern Lens: Refresh"
 - Press Enter
 
 ---
@@ -173,7 +179,7 @@ Use Command Palette (Ctrl+Shift+P):
 ## 📁 Project Structure
 
 ```
-pattern-dojo/                    # Your project folder
+pattern-lens/                    # Your project folder
 ├── src/
 │   ├── extension.ts             # Main entry point
 │   ├── types.ts                 # Interfaces
@@ -199,7 +205,7 @@ pattern-dojo/                    # Your project folder
 **A:** Check the **Problems panel** (View > Problems or Ctrl+Shift+M)
 
 ### Q: How do I disable the extension?
-**A:** Set `"pattern-dojo.enabled": false` in settings
+**A:** Set `"pattern-lens.enabled": false` in settings
 
 ### Q: Can I add custom patterns?
 **A:** Yes! See [DEVELOPMENT.md](DEVELOPMENT.md#adding-new-patterns)
@@ -211,7 +217,7 @@ pattern-dojo/                    # Your project folder
 **A:** On file open, save, and after 500ms of changes (debounced)
 
 ### Q: Can I change severity levels?
-**A:** Yes! Use `"pattern-dojo.severity"`: "error" | "warning" | "information"
+**A:** Yes! Use `"pattern-lens.severity"`: "error" | "warning" | "information"
 
 ### Q: Is it slow?
 **A:** No! Analysis takes ~50-200ms per file with debouncing
@@ -253,7 +259,7 @@ pattern-dojo/                    # Your project folder
 - ✅ Documentation complete
 - ✅ Ready to run with F5
 
-**Press F5 now to start using Pattern Dojo!**
+**Press F5 now to start using Pattern Lens!**
 
 ---
 

@@ -7,60 +7,61 @@ import { WelcomeViewProvider } from './views/welcomeViewProvider';
 
 let analyzer: PatternAnalyzer;
 let disposables: vscode.Disposable[] = [];
+let statusBarItem: vscode.StatusBarItem;
 
 /**
  * Activate the extension
  */
-export function activate(context: vscode.ExtensionContext) {
-  console.log('Pattern Dojo extension is now active!');
+export async function activate(context: vscode.ExtensionContext) {
+  try {
+    console.log('Pattern Lens extension is now active!');
 
-  // Register welcome view
-  const welcomeProvider = new WelcomeViewProvider(context.extensionUri);
-  disposables.push(
-    vscode.window.registerWebviewViewProvider(
-      WelcomeViewProvider.viewType,
-      welcomeProvider,
-      { webviewOptions: { retainContextWhenHidden: true } }
-    )
-  );
+    // Create status bar item
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBarItem.command = 'pattern-lens.reportIssue';
+    disposables.push(statusBarItem);
 
-  // Register all built-in pattern providers
-  const providers = createBuiltInProviders();
-  for (const provider of providers) {
-    patternRegistry.register(provider);
+    // Register all built-in pattern providers
+    const providers = createBuiltInProviders();
+    for (const provider of providers) {
+      patternRegistry.register(provider);
+    }
+
+    // Create analyzer
+    analyzer = new PatternAnalyzer(patternRegistry);
+
+    // Register code action provider for supported languages
+    const supported = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'java', 'python', 'csharp'];
+    for (const lang of supported) {
+      disposables.push(vscode.languages.registerCodeActionsProvider(lang, PatternCodeActionProvider, { providedCodeActionKinds: PatternCodeActionProviderClass.providedCodeActionKinds }));
+    }
+
+    // Register commands
+    disposables.push(
+      vscode.commands.registerCommand('pattern-lens.refresh', refreshAnalysis),
+      vscode.commands.registerCommand('pattern-lens.reportIssue', reportIssue),
+      vscode.commands.registerCommand('pattern-lens.disablePatternWorkspace', disablePatternWorkspace),
+      vscode.commands.registerCommand('pattern-lens.setPatternSeverityWorkspace', setPatternSeverityWorkspace),
+      vscode.commands.registerCommand('pattern-lens.managePatterns', managePatterns)
+    );
+
+    // Analyze current open files
+    await analyzer.analyzeAllDocuments().catch(console.error);
+
+    // Listen for document changes
+    disposables.push(
+      vscode.workspace.onDidOpenTextDocument(onDocumentOpen),
+      vscode.workspace.onDidChangeTextDocument(onDocumentChange),
+      vscode.workspace.onDidChangeConfiguration(onConfigurationChange),
+      vscode.workspace.onDidCloseTextDocument(onDocumentClose)
+    );
+
+    // Add disposables to context
+    context.subscriptions.push(...disposables);
+  } catch (err) {
+    console.error('Failed to activate Pattern Lens:', err);
+    vscode.window.showErrorMessage(`Pattern Lens failed to activate: ${err}`);
   }
-
-  // Create analyzer
-  analyzer = new PatternAnalyzer(patternRegistry);
-
-  // Register code action provider for supported languages
-  const supported = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'java', 'python', 'csharp'];
-  for (const lang of supported) {
-    disposables.push(vscode.languages.registerCodeActionsProvider(lang, PatternCodeActionProvider, { providedCodeActionKinds: PatternCodeActionProviderClass.providedCodeActionKinds }));
-  }
-
-  // Register commands
-  disposables.push(
-    vscode.commands.registerCommand('pattern-dojo.refresh', refreshAnalysis),
-    vscode.commands.registerCommand('pattern-dojo.reportIssue', reportIssue),
-    vscode.commands.registerCommand('pattern-dojo.disablePatternWorkspace', disablePatternWorkspace),
-    vscode.commands.registerCommand('pattern-dojo.setPatternSeverityWorkspace', setPatternSeverityWorkspace),
-    vscode.commands.registerCommand('pattern-dojo.managePatterns', managePatterns)
-  );
-
-  // Analyze current open files
-  analyzer.analyzeAllDocuments().catch(console.error);
-
-  // Listen for document changes
-  disposables.push(
-    vscode.workspace.onDidOpenTextDocument(onDocumentOpen),
-    vscode.workspace.onDidChangeTextDocument(onDocumentChange),
-    vscode.workspace.onDidChangeConfiguration(onConfigurationChange),
-    vscode.workspace.onDidCloseTextDocument(onDocumentClose)
-  );
-
-  // Add disposables to context
-  context.subscriptions.push(...disposables);
 }
 
 /**
@@ -76,7 +77,7 @@ export function deactivate() {
  * Handle document open event
  */
 async function onDocumentOpen(document: vscode.TextDocument) {
-  await analyzer.analyzeDocument(document);
+  await analyzeAndUpdateStatus(document);
 }
 
 /**
@@ -88,7 +89,7 @@ async function onDocumentChange(event: vscode.TextDocumentChangeEvent) {
     clearTimeout(changeTimeout);
   }
   changeTimeout = setTimeout(() => {
-    analyzer.analyzeDocument(event.document).catch(console.error);
+    analyzeAndUpdateStatus(event.document).catch(console.error);
   }, 500); // Debounce 500ms
 }
 
@@ -98,12 +99,44 @@ async function onDocumentChange(event: vscode.TextDocumentChangeEvent) {
 async function onConfigurationChange() {
   analyzer.reloadConfig();
   await analyzer.analyzeAllDocuments();
+  if (vscode.window.activeTextEditor) {
+      await analyzeAndUpdateStatus(vscode.window.activeTextEditor.document);
+  }
 }
+
+/**
+ * Analyze document and update status bar
+ */
+async function analyzeAndUpdateStatus(document: vscode.TextDocument) {
+    await analyzer.analyzeDocument(document);
+    updateStatusBar(document);
+}
+
+/**
+ * Update status bar based on diagnostics
+ */
+function updateStatusBar(document: vscode.TextDocument) {
+    const diagnostics = analyzer.getDiagnostics(document.uri);
+    if (!diagnostics || diagnostics.length === 0) {
+        if (analyzer.isSupportedLanguage(document.languageId)) {
+            statusBarItem.text = '✅ Pattern Lens: Pass';
+            statusBarItem.tooltip = 'No design pattern violations detected';
+            statusBarItem.show();
+        } else {
+            statusBarItem.hide();
+        }
+    } else {
+        statusBarItem.text = `$(alert) Pattern Lens: ${diagnostics.length} Issues`;
+        statusBarItem.tooltip = 'Click to report false positives';
+        statusBarItem.show();
+    }
+}
+
 
 /**
  * Handle document close event
  */
-function onDocumentClose(document: vscode.TextDocument) {
+function onDocumentClose(_document: vscode.TextDocument) {
   // Diagnostics are automatically cleaned up
 }
 
@@ -147,9 +180,13 @@ async function reportIssue() {
 async function disablePatternWorkspace(patternCode: string) {
   try {
     const patternKey = String(patternCode).split('-')[0];
-    const cfg = vscode.workspace.getConfiguration('pattern-dojo');
-    const patterns = cfg.get<string[]>('patterns') || [];
-    const updated = patterns.filter(p => p !== patternKey);
+    const cfg = vscode.workspace.getConfiguration('pattern-lens');
+    const patterns = cfg.get<Record<string, boolean>>('patterns') || {};
+    // const updated = patterns.filter(p => p !== patternKey); // Old logic
+    // Set to false in object
+    const updated = { ...patterns };
+    if (updated[patternKey] !== undefined) updated[patternKey] = false;
+    
     await cfg.update('patterns', updated, vscode.ConfigurationTarget.Workspace);
     vscode.window.showInformationMessage(`Disabled pattern '${patternKey}' in workspace settings.`);
   } catch (e) {
@@ -164,11 +201,18 @@ async function setPatternSeverityWorkspace(patternCode: string) {
   const severity = await vscode.window.showQuickPick(['error', 'warning', 'information'], { placeHolder: 'Select severity for the pattern' });
   if (!severity) return;
   try {
-    const cfg = vscode.workspace.getConfiguration('pattern-dojo');
-    const map = cfg.get<Record<string, string>>('patternSeverities') || {};
-    map[String(patternCode)] = severity;
-    await cfg.update('patternSeverities', map, vscode.ConfigurationTarget.Workspace);
-    vscode.window.showInformationMessage(`Set severity for '${patternCode}' to ${severity} in workspace settings.`);
+    const cfg = vscode.workspace.getConfiguration('pattern-lens');
+    // For object-based severity, we update the object
+    const map = cfg.get<Record<string, string>>('severity') || {};
+    // map[String(patternCode)] = severity; // patternCode might include code, but config is by pattern name key
+    // Actually patternAnalyzer uses provider.patternName as key. 
+    // patternCode usually comes from diagnostic code e.g. 'singleton-public-constructor'.
+    // We need to map code to pattern key.
+    const key = String(patternCode).split('-')[0]; // simple heuristic
+    map[key] = severity;
+
+    await cfg.update('severity', map, vscode.ConfigurationTarget.Workspace);
+    vscode.window.showInformationMessage(`Set severity for '${key}' to ${severity} in workspace settings.`);
   } catch (e) {
     vscode.window.showErrorMessage('Failed to update pattern severity.');
   }
@@ -178,17 +222,24 @@ async function setPatternSeverityWorkspace(patternCode: string) {
  * Manage enabled patterns via quick pick
  */
 async function managePatterns() {
-  const cfg = vscode.workspace.getConfiguration('pattern-dojo');
+  const cfg = vscode.workspace.getConfiguration('pattern-lens');
   const available = patternRegistry.getAvailablePatterns();
-  const enabled = cfg.get<string[]>('patterns') || [];
+  const enabledMap = cfg.get<Record<string, boolean>>('patterns') || {};
+  
   const picks = await vscode.window.showQuickPick(
-    available.map(p => ({ label: p, picked: enabled.includes(p) })),
+    available.map(p => ({ label: p, picked: !!enabledMap[p] || (enabledMap[p] === undefined && true) })),
     { canPickMany: true, placeHolder: 'Select enabled patterns' }
   );
   if (!picks) return;
-  const selected = picks.map(p => p.label);
+  
+  const newMap: Record<string, boolean> = {};
+  // default all to false or keep existing?
+  // Logic: For selected, set true. For others, set false.
+  available.forEach(p => newMap[p] = false);
+  picks.forEach(p => newMap[p.label] = true);
+
   try {
-    await cfg.update('patterns', selected, vscode.ConfigurationTarget.Workspace);
+    await cfg.update('patterns', newMap, vscode.ConfigurationTarget.Workspace);
     vscode.window.showInformationMessage('Updated enabled patterns in workspace settings.');
   } catch (e) {
     vscode.window.showErrorMessage('Failed to update enabled patterns.');

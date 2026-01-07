@@ -2,7 +2,7 @@
 
 ## Overview
 
-Pattern Dojo now includes **real Tree-Sitter parsers** for Java, Python, and C#. The regex-based fallback has been replaced with accurate AST parsing using the `tree-sitter-*` npm packages.
+Pattern Lens now includes **real Tree-Sitter parsers** for Java, Python, and C#. The regex-based fallback has been replaced with accurate AST parsing using the `tree-sitter-*` npm packages.
 
 ## What's Changed
 

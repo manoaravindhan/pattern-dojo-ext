@@ -12,7 +12,7 @@ export interface PatternProvider {
   /**
    * Analyze code and return detected pattern violations
    */
-  analyze(document: vscode.TextDocument): PatternViolation[];
+  analyze(document: vscode.TextDocument): Promise<PatternViolation[]> | PatternViolation[];
 
   /**
    * Optional lifecycle hook called when provider is registered
@@ -41,10 +41,8 @@ export interface PatternViolation {
  */
 export interface AnalysisConfig {
   enabled: boolean;
-  patterns: string[];
-  severity: 'error' | 'warning' | 'information';
-  /** per-pattern severity overrides */
-  patternSeverities?: Record<string, 'error' | 'warning' | 'information'>;
+  patterns: Record<string, boolean>;
+  severity: Record<string, 'error' | 'warning' | 'information'>;
   /** files or globs to ignore */
   ignore?: string[];
 }

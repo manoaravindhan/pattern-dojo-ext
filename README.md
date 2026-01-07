@@ -1,9 +1,9 @@
-# Pattern Dojo - Design Pattern Issue Detector
+# Pattern Lens - Design Pattern Issue Detector
 
-Pattern Dojo is a scalable VS Code extension that detects common design pattern violations and anti-patterns in your code, highlighting them for easy identification and refactoring.
+Pattern Lens is a scalable VS Code extension that detects common design pattern violations and anti-patterns in your code, highlighting them for easy identification and refactoring.
 
 
-![VS Code window displaying Pattern Dojo extension detecting design pattern violations in TypeScript code. The editor shows a Database class with a singleton pattern issue highlighted in yellow. The Problems panel at the bottom lists seven pattern violations including singleton non-private constructor, observer unsubscribed event listener, and multiple strategy pattern long if-else chains. The interface demonstrates real-time code analysis with diagnostic messages and pattern suggestions.](images/demo.gif)
+![VS Code window displaying Pattern Lens extension detecting design pattern violations in TypeScript code. The editor shows a Database class with a singleton pattern issue highlighted in yellow. The Problems panel at the bottom lists seven pattern violations including singleton non-private constructor, observer unsubscribed event listener, and multiple strategy pattern long if-else chains. The interface demonstrates real-time code analysis with diagnostic messages and pattern suggestions.](images/demo.gif)
 
 
 ## Features
@@ -36,18 +36,25 @@ The extension automatically analyzes your code when you open or edit files. Patt
 
 ### Commands
 
-- **Pattern Dojo: Refresh Pattern Analysis** - Manually refresh the analysis for the current file
-- **Pattern Dojo: Report Pattern Issue** - Report a false positive or suggest a new pattern
+- **Pattern Lens: Refresh Pattern Analysis** - Manually refresh the analysis for the current file
+- **Pattern Lens: Report Pattern Issue** - Report a false positive or suggest a new pattern
+- **Pattern Lens: Disable Pattern** - Disable a specific pattern in your settings
 
 ## Configuration
 
-Configure Pattern Dojo in your VS Code settings:
+Configure Pattern Lens in your VS Code settings:
 
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": ["singleton", "factory", "observer"],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": {
+      "singleton": true,
+      "factory": true,
+      "observer": true
+  },
+  "pattern-lens.severity": {
+      "singleton": "warning"
+  }
 }
 ```
 

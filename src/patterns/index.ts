@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { PatternProvider } from '../types';
+import { CompositePatternProvider } from './compositeProvider';
 import { SingletonPatternProvider } from './implementations/singletonProvider';
 import { FactoryPatternProvider } from './implementations/factoryProvider';
 import { ObserverPatternProvider } from './implementations/observerProvider';
@@ -12,6 +13,11 @@ import {
   MultiLanguageSingletonProvider,
   MultiLanguageFactoryProvider,
   MultiLanguageDecoratorProvider,
+  MultiLanguageStrategyProvider,
+  MultiLanguageObserverProvider,
+  MultiLanguageAdapterProvider,
+  MultiLanguageFacadeProvider,
+  MultiLanguageProxyProvider,
 } from './implementations/multiLanguageProviders';
 
 /**
@@ -19,20 +25,80 @@ import {
  * Includes both TypeScript-specific and multi-language providers
  */
 export function createBuiltInProviders(): PatternProvider[] {
+  const tsLangs = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
+  
   return [
-    // TypeScript/JavaScript specific providers (high accuracy)
-    new SingletonPatternProvider(),
-    new FactoryPatternProvider(),
-    new ObserverPatternProvider(),
-    new StrategyPatternProvider(),
-    new DecoratorPatternProvider(),
-    new AdapterPatternProvider(),
-    new FacadePatternProvider(),
-    new ProxyPatternProvider(),
-    // Multi-language providers (for Java, Python, C#, etc.)
-    new MultiLanguageSingletonProvider(),
-    new MultiLanguageFactoryProvider(),
-    new MultiLanguageDecoratorProvider(),
+    // Singleton
+    new CompositePatternProvider(
+      'Singleton Pattern Detector',
+      'Detects Singleton pattern violations',
+      'singleton',
+      [{ language: tsLangs, provider: new SingletonPatternProvider() }],
+      new MultiLanguageSingletonProvider() // Default for other languages
+    ),
+
+    // Factory
+    new CompositePatternProvider(
+      'Factory Pattern Detector',
+      'Detects Factory pattern opportunities',
+      'factory',
+      [{ language: tsLangs, provider: new FactoryPatternProvider() }],
+      new MultiLanguageFactoryProvider()
+    ),
+
+    // Decorator
+    new CompositePatternProvider(
+      'Decorator Pattern Detector',
+      'Detects deep inheritance hierarchies',
+      'decorator',
+      [{ language: tsLangs, provider: new DecoratorPatternProvider() }],
+      new MultiLanguageDecoratorProvider()
+    ),
+
+    // Observer
+    new CompositePatternProvider(
+      'Observer Pattern Detector',
+      'Detects potential Observer pattern logic (add/remove listeners)',
+      'observer',
+      [{ language: tsLangs, provider: new ObserverPatternProvider() }],
+      new MultiLanguageObserverProvider()
+    ),
+    
+    // Strategy
+    new CompositePatternProvider(
+      'Strategy Pattern Detector',
+      'Detects issues with Strategy pattern implementation',
+      'strategy',
+      [{ language: tsLangs, provider: new StrategyPatternProvider() }],
+      new MultiLanguageStrategyProvider()
+    ),
+
+    // Adapter
+    new CompositePatternProvider(
+      'Adapter Pattern Detector',
+      'Detects frequent type casting or try-catch blocks',
+      'adapter',
+      [{ language: tsLangs, provider: new AdapterPatternProvider() }],
+      new MultiLanguageAdapterProvider()
+    ),
+
+    // Facade
+    new CompositePatternProvider(
+      'Facade Pattern Detector',
+      'Detects classes with complex public interfaces',
+      'facade',
+      [{ language: tsLangs, provider: new FacadePatternProvider() }],
+      new MultiLanguageFacadeProvider()
+    ),
+
+    // Proxy
+    new CompositePatternProvider(
+      'Proxy Pattern Detector',
+      'Detects repeated expensive operations',
+      'proxy',
+      [{ language: tsLangs, provider: new ProxyPatternProvider() }],
+      new MultiLanguageProxyProvider()
+    ),
   ];
 }
 
@@ -40,6 +106,7 @@ export function createBuiltInProviders(): PatternProvider[] {
  * Export all providers for external use
  */
 export {
+  CompositePatternProvider,
   SingletonPatternProvider,
   FactoryPatternProvider,
   ObserverPatternProvider,
@@ -51,4 +118,9 @@ export {
   MultiLanguageSingletonProvider,
   MultiLanguageFactoryProvider,
   MultiLanguageDecoratorProvider,
+  MultiLanguageStrategyProvider,
+  MultiLanguageObserverProvider,
+  MultiLanguageAdapterProvider,
+  MultiLanguageFacadeProvider,
+  MultiLanguageProxyProvider,
 };

@@ -4,9 +4,9 @@
  */
 
 import Parser from 'web-tree-sitter';
-import * as CSharp from 'tree-sitter-c-sharp';
 import { CommonASTNode, NodeKind, ParseResult, Modifier, CommonSymbol } from '../commonAst';
 import { LanguageAdapter } from '../languageAdapter';
+import * as path from 'path';
 
 export class CSharpLanguageAdapter implements LanguageAdapter {
   readonly extensions = ['.cs'];
@@ -20,9 +20,21 @@ export class CSharpLanguageAdapter implements LanguageAdapter {
 
   private async initParser(): Promise<any> {
     if (this.parser) return this.parser;
-    await (Parser as any).init();
+    
+    // Load main Tree-Sitter WASM
+    const mainWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter.wasm');
+    await (Parser as any).init({
+        locateFile: () => mainWasmPath
+    });
+
     this.parser = new (Parser as any)();
-    this.parser.setLanguage(CSharp);
+
+    // Load Language WASM
+    // Note: File name is usually c-sharp or c_sharp. We copied it as c-sharp.
+    const langWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter-c-sharp.wasm');
+    const lang = await (Parser as any).Language.load(langWasmPath);
+
+    this.parser.setLanguage(lang);
     return this.parser;
   }
 
@@ -30,8 +42,12 @@ export class CSharpLanguageAdapter implements LanguageAdapter {
     return filePath.endsWith('.cs');
   }
 
-  parse(filePath: string, sourceCode: string): ParseResult {
+  async parse(filePath: string, sourceCode: string): Promise<ParseResult> {
     try {
+      if (!this.parser) {
+          await this.parserReady;
+      }
+      
       if (!this.parser) {
         return this.createEmptyResult(sourceCode);
       }
@@ -108,13 +124,49 @@ export class CSharpLanguageAdapter implements LanguageAdapter {
   }
 
   private extractName(node: any, sourceCode: string): string | undefined {
-    // For declarations, look for identifier child
+    // Handle object creation
+    if (node.type === 'object_creation_expression') {
+         // child 1 is usually the type (child 0 is 'new')
+         for (let i = 0; i < node.childCount; i++) {
+             const child = node.child(i);
+             // Type is usually 'identifier_name' or 'generic_name'
+             if (child.type !== 'new_keyword' && (child.type === 'identifier_name' || child.type === 'generic_name' || child.type === 'qualified_name')) {
+                 return sourceCode.substring(child.startIndex, child.endIndex);
+             }
+         }
+    }
+
+    // Handle fields/properties
+    if (node.type === 'field_declaration' || node.type === 'variable_declaration') {
+         // field_declaration -> variable_declaration -> variable_declarator -> identifier
+         // or field_declaration -> variable_declarator (depending on schema version, C# usually has variable_declaration wrapper?)
+         // Let's search recursively for variable_declarator
+         const current = node; 
+         // logic to find children
+         for(let i=0; i<node.childCount; i++) {
+             const child = node.child(i);
+             if (child.type === 'variable_declaration') {
+                 // get declarator
+                  for(let j=0; j<child.childCount; j++) {
+                     const decl = child.child(j);
+                     if (decl.type === 'variable_declarator') {
+                         const id = decl.child(0); // name is first child
+                         if (id) return sourceCode.substring(id.startIndex, id.endIndex);
+                     }
+                  }
+             }
+         }
+    }
+    
+    // Fallback: For known declaration types or generic structure, look for identifier
     if (
       node.type === 'class_declaration' ||
       node.type === 'interface_declaration' ||
       node.type === 'struct_declaration' ||
       node.type === 'method_declaration' ||
-      node.type === 'constructor_declaration'
+      node.type === 'constructor_declaration' ||
+      node.type === 'property_declaration' ||
+      node.type === 'variable_declarator'
     ) {
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
@@ -156,12 +208,21 @@ export class CSharpLanguageAdapter implements LanguageAdapter {
     const metadata: Record<string, any> = {};
 
     if (node.type === 'class_declaration' || node.type === 'struct_declaration') {
-      // Look for base list (inheritance)
+      // Look for base list (inheritance). Format: : Base, Iface1
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
         if (child && child.type === 'base_list') {
-          const baseListText = sourceCode.substring(child.startIndex, child.endIndex);
-          metadata.baseClass = baseListText.replace(/^:\s*/, '').trim();
+          // Flatten split logic: take the first identifier in the list
+          for (let j = 0; j < child.childCount; j++) {
+             const baseItem = child.child(j);
+             if (baseItem.type === 'identifier_name' || baseItem.type === 'simple_type' || baseItem.type === 'qualified_name') {
+                 const name = sourceCode.substring(baseItem.startIndex, baseItem.endIndex);
+                 // Usually first one is class if present, or interface. 
+                 // Simple clean: assume single inheritance of importance for Decorator depth check
+                 metadata.extendsClass = name;
+                 break;
+             }
+          }
           break;
         }
       }

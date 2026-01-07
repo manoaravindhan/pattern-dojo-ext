@@ -1,4 +1,4 @@
-# Pattern Dojo - Quick Reference
+# Pattern Lens - Quick Reference
 
 ## Installation & Running
 
@@ -20,12 +20,20 @@ npm run watch
 
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": [
-    "singleton", "factory", "observer", "strategy",
-    "decorator", "adapter", "facade", "proxy"
-  ],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": {
+    "singleton": true,
+    "factory": true,
+    "observer": true,
+    "strategy": true,
+    "decorator": true,
+    "adapter": true,
+    "facade": true,
+    "proxy": true
+  },
+  "pattern-lens.severity": {
+    "singleton": "warning"
+  }
 }
 ```
 
@@ -33,8 +41,8 @@ npm run watch
 
 | Command | Action |
 |---------|--------|
-| `Pattern Dojo: Refresh` | Re-analyze current file |
-| `Pattern Dojo: Report Issue` | Report false positive |
+| `Pattern Lens: Refresh` | Re-analyze current file |
+| `Pattern Lens: Report Issue` | Report false positive |
 
 ## Pattern Detectors
 

@@ -1,8 +1,8 @@
-# Pattern Dojo - Project Summary
+# Pattern Lens - Project Summary
 
 ## 🎯 What Was Created
 
-Pattern Dojo is a **production-ready VS Code extension** that detects design pattern violations and anti-patterns in code. It features:
+Pattern Lens is a **production-ready VS Code extension** that detects design pattern violations and anti-patterns in code. It features:
 
 - ✅ **Real-time code analysis** with instant highlighting
 - ✅ **8 built-in pattern detectors** (Singleton, Factory, Observer, Strategy, Decorator, Adapter, Facade, Proxy)
@@ -14,7 +14,7 @@ Pattern Dojo is a **production-ready VS Code extension** that detects design pat
 ## 📁 Project Structure
 
 ```
-pattern-dojo/
+pattern-lens/
 ├── src/
 │   ├── extension.ts              # Main entry point
 │   ├── types.ts                  # Core interfaces
@@ -67,9 +67,9 @@ Open `example.ts` to see various pattern violations detected in the Problems pan
 Add to `.vscode/settings.json`:
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": ["singleton", "factory"],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": ["singleton", "factory"],
+  "pattern-lens.severity": "warning"
 }
 ```
 

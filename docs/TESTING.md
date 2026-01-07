@@ -1,4 +1,4 @@
-# Testing Pattern Dojo
+# Testing Pattern Lens
 
 ## Manual Testing
 
@@ -107,7 +107,7 @@ service.fetch(url2);
 
 Add to `.vscode/settings.json`:
 ```json
-{ "pattern-dojo.enabled": false }
+{ "pattern-lens.enabled": false }
 ```
 
 **Expected**: No diagnostics appear
@@ -116,7 +116,7 @@ Add to `.vscode/settings.json`:
 
 ```json
 {
-  "pattern-dojo.patterns": ["singleton"]
+  "pattern-lens.patterns": ["singleton"]
 }
 ```
 
@@ -126,7 +126,7 @@ Add to `.vscode/settings.json`:
 
 ```json
 {
-  "pattern-dojo.severity": "error"
+  "pattern-lens.severity": "error"
 }
 ```
 
@@ -213,7 +213,7 @@ npm test
 
 ### Issue: No diagnostics appearing
 
-- [ ] Verify `pattern-dojo.enabled: true`
+- [ ] Verify `pattern-lens.enabled: true`
 - [ ] Check file is supported language
 - [ ] Run "Refresh Pattern Analysis" command
 - [ ] Check Output panel for errors

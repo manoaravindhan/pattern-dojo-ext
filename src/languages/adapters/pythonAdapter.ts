@@ -4,9 +4,9 @@
  */
 
 import Parser from 'web-tree-sitter';
-import * as Python from 'tree-sitter-python';
 import { CommonASTNode, NodeKind, ParseResult, Modifier, CommonSymbol } from '../commonAst';
 import { LanguageAdapter } from '../languageAdapter';
+import * as path from 'path';
 
 export class PythonLanguageAdapter implements LanguageAdapter {
   readonly extensions = ['.py'];
@@ -20,9 +20,20 @@ export class PythonLanguageAdapter implements LanguageAdapter {
 
   private async initParser(): Promise<any> {
     if (this.parser) return this.parser;
-    await (Parser as any).init();
+    
+    // Load main Tree-Sitter WASM
+    const mainWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter.wasm');
+    await (Parser as any).init({
+        locateFile: () => mainWasmPath
+    });
+
     this.parser = new (Parser as any)();
-    this.parser.setLanguage(Python);
+    
+    // Load Language WASM
+    const langWasmPath = path.resolve(__dirname, '..', '..', '..', 'wasm', 'tree-sitter-python.wasm');
+    const lang = await (Parser as any).Language.load(langWasmPath);
+    
+    this.parser.setLanguage(lang);
     return this.parser;
   }
 
@@ -30,8 +41,12 @@ export class PythonLanguageAdapter implements LanguageAdapter {
     return filePath.endsWith('.py');
   }
 
-  parse(filePath: string, sourceCode: string): ParseResult {
+  async parse(filePath: string, sourceCode: string): Promise<ParseResult> {
     try {
+      if (!this.parser) {
+        await this.parserReady;
+      }
+
       if (!this.parser) {
         return this.createEmptyResult(sourceCode);
       }
@@ -55,9 +70,41 @@ export class PythonLanguageAdapter implements LanguageAdapter {
     tsNode: any,
     sourceCode: string
   ): CommonASTNode {
+    let kind = this.mapNodeKind(tsNode.type);
+    const name = this.extractName(tsNode, sourceCode);
+
+    // Python-specific adjustments
+    if (kind === NodeKind.MethodDeclaration && name === '__init__') {
+      kind = NodeKind.ConstructorDeclaration;
+    }
+
+    // Map function calls to NewExpression if they look like class instantiation (PascalCase)
+    if (kind === NodeKind.CallExpression && name && /^[A-Z][a-zA-Z0-9]*$/.test(name)) {
+        kind = NodeKind.NewExpression;
+    }
+
+    // Map class-level assignments to FieldDeclaration for static/instance fields
+    if (kind === NodeKind.AssignmentExpression) {
+        // Check if parent is class definition (this requires passing parent or inferring context)
+        // Since we are recursing down, we don't have easy access to parent here in isolation unless we pass it.
+        // However, we can check basic structure or rely on the fact that this is AST conversion.
+        // But `convertToCommonAST` doesn't take parent.
+        // Simplification: We will patch this AFTER children are processed or handle it by heuristics later?
+        // Actually, better to do it here if possible. 
+        // For now, let's just allow AssignmentExpression to remain, but update MethodDeclaration for __init__.
+        // But wait, SingleProvider looks for FieldDeclaration!
+        
+        // Let's rely on the container. If this is a child of ClassDeclaration, the provider will see children.
+        // The provider might need to check for AssignmentExpression too.
+        // OR we can change it here.
+        // A class variable in Python looks like: `x = 1` inside class.
+        // The `convertToCommonAST` is called recursively. 
+        // We can pass `parentKind` context? No, signature is fixed.
+    }
+
     const node: CommonASTNode = {
-      kind: this.mapNodeKind(tsNode.type),
-      name: this.extractName(tsNode, sourceCode),
+      kind,
+      name,
       startPosition: tsNode.startIndex,
       endPosition: tsNode.endIndex,
       startLine: tsNode.startPosition.row + 1,
@@ -70,10 +117,33 @@ export class PythonLanguageAdapter implements LanguageAdapter {
       metadata: this.extractMetadata(tsNode, sourceCode),
     };
 
+    // Special handling for class variables:
+    // If we are essentially looking at an assignment, and we can't easily tell the parent, 
+    // we might just leave it as AssignmentExpression.
+    // However, we can check if it looks like a variable declaration?
+    
     for (let i = 0; i < tsNode.childCount; i++) {
       const child = tsNode.child(i);
       if (child) {
-        node.children.push(this.convertToCommonAST(child, sourceCode));
+        const childNode = this.convertToCommonAST(child, sourceCode);
+        
+        // Post-processing child for context-aware adjustments
+        if (kind === NodeKind.ClassDeclaration && childNode.kind === NodeKind.AssignmentExpression) {
+           childNode.kind = NodeKind.FieldDeclaration;
+           childNode.modifiers = childNode.modifiers || [];
+           childNode.modifiers.push(Modifier.Static); // Python class attributes are implicitly static
+           
+           // We also want to extract the "name" from the assignment target
+           // In Python: `instance = ...` -> left side is target.
+           // Assignment child[0] is usually left hand side.
+           if (child.childCount > 0) {
+              const lhs = child.child(0);
+              const lhsCode = sourceCode.substring(lhs.startIndex, lhs.endIndex);
+              childNode.name = lhsCode;
+           }
+        }
+
+        node.children.push(childNode);
       }
     }
 
@@ -85,6 +155,7 @@ export class PythonLanguageAdapter implements LanguageAdapter {
       class_definition: NodeKind.ClassDeclaration,
       function_definition: NodeKind.MethodDeclaration,
       if_statement: NodeKind.IfStatement,
+      elif_clause: NodeKind.IfStatement,
       match_statement: NodeKind.SwitchStatement,
       try_statement: NodeKind.TryStatement,
       for_statement: NodeKind.ForStatement,
@@ -119,6 +190,23 @@ export class PythonLanguageAdapter implements LanguageAdapter {
       }
     }
 
+    if (node.type === 'call') {
+      const funcNode = node.childForFieldName('function');
+      if (funcNode) {
+          if (funcNode.type === 'identifier') {
+              return sourceCode.substring(funcNode.startIndex, funcNode.endIndex);
+          } else if (funcNode.type === 'attribute') {
+               // For obj.method(), we might want 'method' or 'obj.method'. 
+               // For NewExpression detection (PascalCase), we usually want the last part.
+               // e.g. models.Database() -> Database
+               const lastChild = funcNode.child(funcNode.childCount - 1);
+               if (lastChild && lastChild.type === 'identifier') {
+                   return sourceCode.substring(lastChild.startIndex, lastChild.endIndex);
+               }
+          }
+      }
+    }
+
     return undefined;
   }
 
@@ -150,9 +238,15 @@ export class PythonLanguageAdapter implements LanguageAdapter {
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
         if (child && child.type === 'argument_list') {
-          const argText = sourceCode.substring(child.startIndex, child.endIndex);
-          metadata.extendsClass = argText.replace(/[()]/g, '').trim();
-          break;
+            // argument_list children include parens, identifiers, commas
+            for (let j = 0; j < child.childCount; j++) {
+                const arg = child.child(j);
+                if (arg.type === 'identifier' || arg.type === 'attribute') {
+                    metadata.extendsClass = sourceCode.substring(arg.startIndex, arg.endIndex);
+                    break; // Take first base class
+                }
+            }
+            break;
         }
       }
     }

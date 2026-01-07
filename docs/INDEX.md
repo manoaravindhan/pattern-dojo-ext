@@ -1,6 +1,6 @@
-# Pattern Dojo - Complete Documentation Index
+# Pattern Lens - Complete Documentation Index
 
-Welcome to Pattern Dojo! This document guides you to all available resources.
+Welcome to Pattern Lens! This document guides you to all available resources.
 
 ## 📖 Core Documentation
 
@@ -145,9 +145,9 @@ Open `example.ts` and check the Problems panel
 Edit `.vscode/settings.json`:
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": ["singleton", "factory"],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": ["singleton", "factory"],
+  "pattern-lens.severity": "warning"
 }
 ```
 

@@ -41,12 +41,14 @@ export class PatternRegistry {
   /**
    * Analyze document with specified providers
    */
-  analyze(document: vscode.TextDocument, providers: PatternProvider[]): PatternViolation[] {
+  async analyze(document: vscode.TextDocument, providers: PatternProvider[]): Promise<PatternViolation[]> {
     const violations: PatternViolation[] = [];
 
     for (const provider of providers) {
       try {
-        const providerViolations = provider.analyze(document);
+        const result = provider.analyze(document);
+        // Handle both async and sync results
+        const providerViolations = result instanceof Promise ? await result : result;
         violations.push(...providerViolations);
       } catch (error) {
         console.error(`Error analyzing pattern ${provider.patternName}:`, error);

@@ -76,9 +76,9 @@ export class MyPatternProvider implements PatternProvider {
 
 The extension supports the following settings:
 
-- `pattern-dojo.enabled` - Enable/disable analysis
-- `pattern-dojo.patterns` - Array of patterns to analyze
-- `pattern-dojo.severity` - Severity level (error/warning/information)
+- `pattern-lens.enabled` - Enable/disable analysis
+- `pattern-lens.patterns` - Array of patterns to analyze
+- `pattern-lens.severity` - Severity level (error/warning/information)
 
 ## Examples
 

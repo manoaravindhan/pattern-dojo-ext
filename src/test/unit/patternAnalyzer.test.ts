@@ -8,23 +8,22 @@ suite('PatternAnalyzer', () => {
   });
 
   test('analyzer respects enabled setting', () => {
-    const config = vscode.workspace.getConfiguration('pattern-dojo');
+    const config = vscode.workspace.getConfiguration('pattern-lens');
     const enabled = config.get('enabled', true);
     assert.strictEqual(typeof enabled, 'boolean', 'Enabled setting is boolean');
   });
 
   test('analyzer respects pattern filter', () => {
-    const config = vscode.workspace.getConfiguration('pattern-dojo');
-    const patterns = config.get('patterns', []);
-    assert.ok(Array.isArray(patterns), 'Patterns is array');
-    assert.strictEqual(patterns.length >= 0, true, 'Patterns configured');
+    const config = vscode.workspace.getConfiguration('pattern-lens');
+    const patterns = config.get('patterns', {});
+    assert.strictEqual(typeof patterns, 'object', 'Patterns is object');
+    assert.strictEqual(Array.isArray(patterns), false, 'Patterns is not an array');
   });
 
   test('analyzer respects severity settings', () => {
-    const config = vscode.workspace.getConfiguration('pattern-dojo');
-    const severity = config.get('severity', 'warning');
-    const valid = ['error', 'warning', 'information'];
-    assert.strictEqual(valid.includes(severity as string), true, 'Valid severity level');
+    const config = vscode.workspace.getConfiguration('pattern-lens');
+    const severity = config.get('severity', {});
+    assert.strictEqual(typeof severity, 'object', 'Severity is object');
   });
 
   test('analyzer handles configuration changes', () => {
@@ -39,7 +38,7 @@ suite('PatternAnalyzer', () => {
 
   test('analyzer supports suppression comments', () => {
     const code = `
-      // pattern-dojo:ignore singleton
+      // pattern-lens:ignore singleton
       class Database {
         public constructor() { }
       }

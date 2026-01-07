@@ -51,10 +51,10 @@ export class PatternCodeActionProvider implements vscode.CodeActionProvider {
         actions.push(action);
       }
 
-      // Generic actions for all pattern-dojo diagnostics
+      // Generic actions for all pattern-lens diagnostics
       if (String(code).startsWith('singleton') || String(code).startsWith('factory') || String(code).startsWith('decorator') || String(code).startsWith('adapter') || String(code).startsWith('proxy') || String(code).startsWith('facade') || String(code).startsWith('observer') || String(code).startsWith('strategy')) {
         // Suppress next-line
-        const suppressTitle = 'Suppress pattern-dojo for next line';
+        const suppressTitle = 'Suppress pattern-lens for next line';
         const suppress = new vscode.CodeAction(suppressTitle, vscode.CodeActionKind.QuickFix);
         suppress.diagnostics = [diagnostic];
         suppress.edit = this.addSuppressNextLineEdit(document, diagnostic.range);
@@ -66,7 +66,7 @@ export class PatternCodeActionProvider implements vscode.CodeActionProvider {
         disableAction.diagnostics = [diagnostic];
         disableAction.command = {
           title: disableTitle,
-          command: 'pattern-dojo.disablePatternWorkspace',
+          command: 'pattern-lens.disablePatternWorkspace',
           arguments: [String(code)],
         };
         actions.push(disableAction);
@@ -118,7 +118,7 @@ export class PatternCodeActionProvider implements vscode.CodeActionProvider {
     const line = range.start.line;
     const pos = new vscode.Position(line, 0);
     const langId = document.languageId;
-    const comment = langId === 'python' ? '# pattern-dojo-disable-next-line\n' : '// pattern-dojo-disable-next-line\n';
+    const comment = langId === 'python' ? '# pattern-lens-disable-next-line\n' : '// pattern-lens-disable-next-line\n';
     edit.insert(document.uri, pos, comment);
     return edit;
   }

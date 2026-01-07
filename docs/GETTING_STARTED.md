@@ -1,6 +1,6 @@
-# Pattern Dojo - Getting Started
+# Pattern Lens - Getting Started
 
-Pattern Dojo is a VS Code extension that detects design pattern violations and anti-patterns in your code.
+Pattern Lens is a VS Code extension that detects design pattern violations and anti-patterns in your code.
 
 ## Quick Start
 
@@ -42,46 +42,49 @@ Open the included `example.ts` file to see various pattern violations detected:
 
 ## Configuration
 
-Configure Pattern Dojo in your VS Code settings (`.vscode/settings.json` or user settings):
+Configure Pattern Lens in your VS Code settings (`.vscode/settings.json` or user settings):
 
 ```json
 {
-  "pattern-dojo.enabled": true,
-  "pattern-dojo.patterns": [
-    "singleton",
-    "factory",
-    "observer",
-    "strategy",
-    "decorator",
-    "adapter",
-    "facade",
-    "proxy"
-  ],
-  "pattern-dojo.severity": "warning"
+  "pattern-lens.enabled": true,
+  "pattern-lens.patterns": {
+    "singleton": true,
+    "factory": true,
+    "observer": true,
+    "strategy": true,
+    "decorator": true,
+    "adapter": true,
+    "facade": true,
+    "proxy": true
+  },
+  "pattern-lens.severity": {
+    "singleton": "warning"
+  }
 }
 ```
 
 ### Configuration Options
 
-- **`pattern-dojo.enabled`** (boolean)
+- **`pattern-lens.enabled`** (boolean)
   - Enable or disable the extension
   - Default: `true`
 
-- **`pattern-dojo.patterns`** (array)
-  - Which patterns to analyze
+- **`pattern-lens.patterns`** (object)
+  - Which patterns to analyze (true/false)
   - Available: `singleton`, `factory`, `observer`, `strategy`, `decorator`, `adapter`, `facade`, `proxy`
   - Default: All patterns enabled
 
-- **`pattern-dojo.severity`** (string)
-  - Severity level for violations: `error`, `warning`, or `information`
-  - Default: `warning`
+- **`pattern-lens.severity`** (object)
+  - Severity level for violations: `error`, `warning`, or `information` per pattern
+  - Default: `warning` if not specified
 
 ## Commands
 
-The extension provides two main commands:
+The extension provides main commands:
 
-- **Pattern Dojo: Refresh Pattern Analysis** - Re-analyze the current file
-- **Pattern Dojo: Report Pattern Issue** - Report a false positive or suggest improvements
+- **Pattern Lens: Refresh Pattern Analysis** - Re-analyze the current file
+- **Pattern Lens: Report Pattern Issue** - Report a false positive or suggest improvements
+- **Pattern Lens: Disable Pattern** - Disable a specific pattern in your settings
 
 You can access these through the Command Palette (Ctrl+Shift+P).
 
@@ -191,17 +194,17 @@ npm run compile
 1. Ensure the file is a **supported language** (JavaScript, TypeScript, Java, Python, C#)
 2. Check that the pattern is **enabled** in settings
 3. Run **Pattern Dojo: Refresh Pattern Analysis** command
-4. Check that `pattern-dojo.enabled` is `true`
+4. Check that `pattern-lens.enabled` is `true`
 
 ### Too many false positives?
 
-1. Adjust `pattern-dojo.severity` to `information` to reduce noise
-2. Disable specific patterns in `pattern-dojo.patterns` setting
+1. Adjust `pattern-lens.severity` to `information` to reduce noise
+2. Disable specific patterns in `pattern-lens.patterns` setting
 3. File an issue with an example of the false positive
 
 ### Want to disable the extension?
 
-Set `pattern-dojo.enabled: false` in your settings, or uninstall the extension.
+Set `pattern-lens.enabled: false` in your settings, or uninstall the extension.
 
 ## Contributing
 
